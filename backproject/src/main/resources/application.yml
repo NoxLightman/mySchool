@@ -1,6 +1,9 @@
 server:
   port: 8081
-
+  ssl:
+    key-store: classpath:oilbone.com.jks
+    key-store-password: hfdl4277
+    key-store-type: JKS
 spring:
   datasource:
     url: jdbc:mysql://121.43.233.234:3306/bone

@@ -36,7 +36,7 @@ const validatePassword = (rule, value, callback) => {
 const rule = {
   username: [
     {validator: validateUsername, trigger: ['blur', 'change']},
-    { min:2, max:10, message: "用户名必须在 2-10 个字符之间", trigger: ['blur', 'change']},
+    { min:6, max:10, message: "用户名必须在 6-10 个字符之间", trigger: ['blur', 'change']},
   ],
   password: [
     {required: true, trigger: ['blur', 'change']},

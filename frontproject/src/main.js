@@ -5,7 +5,7 @@ import axios from 'axios'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import {createPinia} from "pinia";
 
-axios.defaults.baseURL = 'http://localhost:8081'
+axios.defaults.baseURL = 'https://www.oilbone.com:8081'
 const app = createApp(App)
 
 app.use(createPinia())

@@ -111,8 +111,8 @@ navigator.geolocation.getCurrentPosition(position => {
 </script>
 
 <template>
-  <div style="display: flex; margin: 20px auto; gap: 5px; max-width: 900px;">
-    <div style="flex: 1">
+  <div style="display: flex; margin: 20px auto; gap: 5px; max-width: 900px; padding:0 20px">
+    <div style="flex: 1; margin-right: 30px">
       <LightCard>
         <div class="create-topic" @click="editor=true">
           <el-icon style="translate: 0 2px"><EditPen/></el-icon>
@@ -147,7 +147,7 @@ navigator.geolocation.getCurrentPosition(position => {
               <lightCard v-for="item in topics.list" class="text-card" @click="router.push(`/index/topic-detail/${item.id}`)">
                 <div style="display: flex">
                   <div>
-                    <el-avatar :size="30" :src="`${axios.defaults.baseURL}/image${item.avatar}`"/>
+                    <el-avatar :size="30" :src="`${store.avatarUserUrl(item.avatar)}`"/>
                   </div>
                   <div style="margin-left: 7px; margin-bottom: 7px;">
                     <div style="font-size: 13px; font-weight: bold;">{{item.username}}</div>

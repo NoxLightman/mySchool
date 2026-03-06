@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@AllArgsConstructor
+//@AllArgsConstructor
 @NoArgsConstructor
 public class Interact {
     Integer tid;
@@ -18,6 +18,13 @@ public class Interact {
 
     public String toKey(){
         return tid + ":" + uid;
+    }
+
+    public Interact(Integer tid, Integer uid, Date time, String type) {
+        this.tid = tid;
+        this.uid = uid;
+        this.time = time;
+        this.type = type;
     }
 
     public static Interact parseInteract(String str, String type){

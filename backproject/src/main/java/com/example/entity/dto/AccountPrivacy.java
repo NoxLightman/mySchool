@@ -35,4 +35,8 @@ public class AccountPrivacy implements BaseData {
         }
         return strings.toArray(String[]::new);
     }
+
+    public AccountPrivacy(Integer id) {
+        this.id = id;
+    }
 }

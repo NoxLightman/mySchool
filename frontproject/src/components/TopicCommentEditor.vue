@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {ElMessage} from "element-plus";
 import {Delta} from "quill";
 import {post} from "@/net/index.js";
@@ -16,6 +16,10 @@ const emit = defineEmits(['close', 'comment'])
 const init = ()=> content.value = new Delta();
 
 function submitComment() {
+  if(deltaToText(content.value).length > 2000){
+    ElMessage.warning("评论字数超出限制");
+    return;
+  }
   post('api/forum/add-comment', {
     tid: props.tid,
     quote: props.quote ? props.quote.id : -1,
@@ -27,14 +31,19 @@ function submitComment() {
 }
 
 function deltaToSimpleText(delta) {
-  let str = '';
-  for(let op of JSON.parse(delta).ops) {
-    str += op.insert;
-  }
+  let str = deltaToText(delta);
   if(str.length > 35) str = str.substring(0, 35);
   return str;
 }
 
+function deltaToText(delta) {
+  if(!delta?.ops) return "";
+  let str = "";
+  for(let op of delta.ops) str += op.insert;
+  return str.replace(/\s/g, "");
+}
+
+const contentLength = computed(() => deltaToText(content.value).length );
 </script>
 
 <template>
@@ -57,6 +66,11 @@ function deltaToSimpleText(delta) {
           />
         </div>
         <div style="margin-top: 90px; text-align: right">
+          <div style="margin-top: 20px; text-align: left; display: flex">
+            <div style="flex: 1; font-size: 13px; color: gray">
+              字数统计: {{contentLength}} (最大支持2000字)
+            </div>
+          </div>
           <el-button type="success" @click="submitComment" plain>发表评论</el-button>
         </div>
       </div>

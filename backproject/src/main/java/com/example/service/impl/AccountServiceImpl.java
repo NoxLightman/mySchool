@@ -3,8 +3,12 @@ package com.example.service.impl;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.Mapper.AccountDetailsMapper;
 import com.example.Mapper.AccountMapper;
+import com.example.Mapper.AccountPrivacyMapper;
 import com.example.entity.dto.Account;
+import com.example.entity.dto.AccountDetails;
+import com.example.entity.dto.AccountPrivacy;
 import com.example.entity.vo.request.*;
 import com.example.service.AccountService;
 import com.example.util.Const;
@@ -37,9 +41,15 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private FlowUtils flowUtils;
     @Resource
     private PasswordEncoder passwordEncoder;
+    @Resource
+    private AccountMapper accountMapper;
+    @Resource
+    private AccountPrivacyMapper accountPrivacyMapper;
 
     @Value("${spring.mail.time}")
     private int codeTime;
+    @Autowired
+    private AccountDetailsMapper accountDetailsMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -94,6 +104,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         Account account = new Account(null, username, password, email, "user", null, new Date());
         if(this.save(account)) {
             stringRedisTemplate.delete(key);
+            accountPrivacyMapper.insert(new AccountPrivacy(account.getId()));
+            AccountDetails details = new AccountDetails();
+            details.setId(account.getId());
+            accountDetailsMapper.insert(details);
             return null;
         } else {
             return "内部错误，请联系管理员";
@@ -155,7 +169,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     private boolean existsAccountByUsername(String username){
-        return this.baseMapper.exists(Wrappers.<Account>query().eq("name", username));
+        return this.baseMapper.exists(Wrappers.<Account>query().eq("username", username));
     }
 
     @Override

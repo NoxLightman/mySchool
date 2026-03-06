@@ -1,28 +1,58 @@
 <template>
-  <div class="main-content" v-loading="loading" element-loading-text="正在进入,请稍后...">
-    <el-container style="height: 100%" v-if="!loading">
+  <div v-loading="loading" class="main-content" element-loading-text="正在进入,请稍后...">
+    <el-container v-if="!loading" style="height: 100%">
       <el-header class="main-content-header">
         <el-image class="logo" src="https://element-plus.org/images/element-plus-logo.svg"></el-image>
         <div style="flex: 1; padding:0 20px; text-align: center">
-            <el-input style="width:100%; max-width: 500px" placeholder="搜索内容相关内容...">
-              <template #prefix>
-                <el-icon><Search/></el-icon>
-              </template>
+          <el-input placeholder="搜索内容相关内容..." style="width:100%; max-width: 500px">
+            <template #prefix>
+              <el-icon><Search/></el-icon>
+            </template>
 
-              <template #append>
-                <el-select  style="width: 120px" v-model="searchInput.type">
-                  <el-option value="1" label="帖子广场"></el-option>
-                  <el-option value="2" label="表白墙"></el-option>
-                  <el-option value="3" label="校园活动"></el-option>
-                  <el-option value="4" label="失物招领"></el-option>
-                  <el-option value="5" label="教务通知"></el-option>
-                </el-select>
+            <template #append>
+              <el-select  v-model="searchInput.type" style="width: 120px">
+                <el-option label="帖子广场" value="1"></el-option>
+                <el-option label="表白墙" value="2"></el-option>
+                <el-option label="校园活动" value="3"></el-option>
+                <el-option label="失物招领" value="4"></el-option>
+                <el-option label="教务通知" value="5"></el-option>
+              </el-select>
 
-              </template>
-            </el-input>
+            </template>
+          </el-input>
         </div>
         <div class="user-info">
+          <el-popover placement="bottom" :width="350" trigger="click">
+            <template #reference>
+              <el-badge is-dot style="margin-right: 20px" :hidden="!notification.length">
+                <div class="notification">
+                  <el-icon><Bell/></el-icon>
+                  <div style="font-size: 10px">消息</div>
+                </div>
+              </el-badge>
+            </template>
+            <el-empty :image-size="80" description="无事发生~~" v-if="!notification.length"/>
+            <el-scrollbar :max-height="500" v-else>
+              <light-card v-for="item in notification" class="notification"
+                          @click="confirmNotification(item.id, item.url)">
+                <div>
+                  <el-tag size="small" :type="item.type">消息</el-tag>&nbsp;
+                  <span style="font-weight: bold; font-size: 14px">{{item.title}}</span>
+                </div>
+                <el-divider style="margin: 7px 0 3px 0"/>
+                <div style="font-size: 13px; color: grey">
+                  {{item.content}}
+                </div>
+              </light-card>
+              <div style="margin-top: 20px">
+                <el-button size="small" type="info" :icon="Check" @click="deleteAllNotification"
+                           style="width:100%" plain>清除未读消息</el-button>
+              </div>
+            </el-scrollbar>
+          </el-popover>
+
           <div class="profile">
+
             <div>{{store.user.username}}</div>
             <div>{{store.user.email}}</div>
           </div>
@@ -37,7 +67,7 @@
                 <el-icon><Message/></el-icon>
                 个人信息
               </el-dropdown-item>
-              <el-dropdown-item @click="userLogout()" divided>
+              <el-dropdown-item divided @click="userLogout()">
                 <el-icon><Back/></el-icon>
                 退出登录
               </el-dropdown-item>
@@ -51,9 +81,9 @@
         <el-aside width="230px">
           <el-scrollbar style="height: calc(100% - 55px)">
             <el-menu
-                router
                 :default-active="$route.path"
                 :default-openeds="['1','2','3']"
+                router
                 style="height: calc(100% - 55px)">
               <el-sub-menu index="1">
                 <template #title>
@@ -83,7 +113,7 @@
                 <el-menu-item>
                   <template #title>
                     <el-icon><School/></el-icon> 海文考研
-                    <el-tag style="margin-left: 10px" size="small">合作机构</el-tag>
+                    <el-tag size="small" style="margin-left: 10px">合作机构</el-tag>
                   </template>
                 </el-menu-item>
 
@@ -138,14 +168,14 @@
             </el-menu>
           </el-scrollbar>
         </el-aside>
-        <el-main style="height: 100%; padding: 0;" class="main-content-page">
-            <el-scrollbar style="height: calc(100% - 55px)">
-              <router-view v-slot="{ Component }">
-                <transition name="el-fade-in-linear" mode="out-in">
-                  <component :is="Component" style="height: 100%"/>
-                </transition>
-              </router-view>
-            </el-scrollbar>
+        <el-main class="main-content-page" style="height: 100%; padding: 0;">
+          <el-scrollbar style="height: calc(100% - 55px)">
+            <router-view v-slot="{ Component }">
+              <transition mode="out-in" name="el-fade-in-linear">
+                <component :is="Component" style="height: 100%"/>
+              </transition>
+            </router-view>
+          </el-scrollbar>
         </el-main>
       </el-container>
     </el-container>
@@ -159,8 +189,8 @@ import {ElHeader, ElAside, ElMain, ElSubMenu, ElMenuItem, ElOption, ElDropdownIt
 import {get} from '@/net'
 import {useStore} from "@/store";
 import {
-  Aim, Back,
-  ChatDotSquare,
+  Aim, Back, Bell,
+  ChatDotSquare, Check,
   Flag, Fries,
   Location, Medal, Message, MostlyCloudy,
   Notebook,
@@ -170,6 +200,7 @@ import {
   SwitchFilled, User
 } from "@element-plus/icons-vue";
 import router from "@/router";
+import LightCard from "@/components/LightCard.vue";
 
 const loading = ref(true);
 const store = useStore();
@@ -187,9 +218,44 @@ function userLogout() {
   router.push('/');
   ElMessage.success("成功退出，欢迎再次使用");
 }
+
+const notification = ref([]);
+const loadNotification = () => get(`/api/notification/list`, data => notification.value = data)
+loadNotification();
+
+function confirmNotification(id, url) {
+  get(`/api/notification/delete?id=${id}`, ()=>{
+    loadNotification();
+    window.open(url);
+  })
+}
+
+function deleteAllNotification() {
+  get(`api/notification/delete-all`, loadNotification);
+}
 </script>
 
 <style lang="less" scoped>
+.notification-item {
+  transition: .3s;
+  &:hover {
+    cursor: pointer;
+    opacity: 0.7;
+  }
+}
+
+.notification{
+  font-size: 22px;
+  line-height: 14px;
+  text-align: center;
+  transition: color .3s;
+
+  &:hover{
+    color: gray;
+    cursor: pointer;
+  }
+}
+
 .main-content {
   height: 100vh;
   width: 100vw;

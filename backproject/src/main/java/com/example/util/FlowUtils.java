@@ -48,11 +48,20 @@ public class FlowUtils {
     private boolean internalCheck(String key, int frequency, int period, LimitAction action){
         if(stringRedisTemplate.hasKey(key)){
             long value = Optional.ofNullable(stringRedisTemplate.opsForValue().increment(key)).orElse(0L);
+            stringRedisTemplate.expire(key, 3, TimeUnit.SECONDS);
             return action.run(value > frequency);
         } else {
             stringRedisTemplate.opsForValue().set(key, "1", frequency, TimeUnit.SECONDS);
             return true;
         }
+    }
+
+    public boolean limitPeriodCheck(String counterKey, String blockKey, int blockTime, int frequency, int period){
+        return this.internalCheck(counterKey, frequency, period, (overclock) -> {
+            if (overclock)
+                stringRedisTemplate.opsForValue().set(blockKey, "", blockTime, TimeUnit.SECONDS);
+            return !overclock;
+        });
     }
 
     private interface LimitAction {

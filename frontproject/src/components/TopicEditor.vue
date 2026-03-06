@@ -103,64 +103,63 @@ function submitTopic() {
 </script>
 
 <template>
-  <div>
-    <el-drawer :model-value="show"
-               :direction="'btt'"
-               :size="650"
-               @open="initEditor"
-               :close-on-click-modal="false"
-               @close="emit('close')"
-    >
-      <template #header>
-        <div>
-          <div style="font-weight: bold">发表新的帖子</div>
-          <div style="font-size: 13px">孩子们，不要在我的网站发表不文明言论</div>
-        </div>
-      </template>
-
-      <div style="display: flex; gap: 10px">
-        <div style="width: 160px">
-          <el-select placeholder="请选择帖子类型..." value-key="id" v-model="editor.type" :disabled="!store.forum.types.length">
-            <el-option v-for="item in store.forum.types.filter(type => type.id > 0)" :value="item" :label="item.name">
-              <div>
-                <ColorDot :color="item.color"></ColorDot>
-                <span style="margin-left: 10px">{{item.name}}</span>
-              </div>
-            </el-option>
-          </el-select>
-        </div>
-        <div style="flex: 1;">
-          <el-input placeholder="请输入帖子标题" :prefix-icon="Document" v-model="editor.title" maxlength="60"></el-input>
-        </div>
+  <el-drawer :model-value="show"
+             :direction="'btt'"
+             :size="650"
+             @open="initEditor"
+             :close-on-click-modal="false"
+             @close="emit('close')"
+             style="width: 800px; margin: auto; border-radius: 10px 10px 0 0;"
+   >
+    <template #header>
+      <div>
+        <div style="font-weight: bold">发表新的帖子</div>
+        <div style="font-size: 13px">孩子们，不要在我的网站发表不文明言论</div>
       </div>
-      <div style="margin-top: 10px; font-size: 13px; color: gray">
-        <ColorDot :color="editor.type? editor.type.color : '#FFFFFF'"></ColorDot>
-        {{editor.type? editor.type.description : '请在上面选择一个帖子标题'}}
-      </div>
+    </template>
 
-      <div style="height: 440px">
-          <MyEditor style="margin-top: 10px; height: calc(100% - 60px); border-radius: 5px"
-                    v-model="editor.text"
-                    placeholder="今天想分享点什么呢 ..."
-                    content-type="delta"
-                    v-loading="editor.loading"
-                    element-loading-text="正在上传图片，请稍后..."
-                    ref="refEditor"
-                    v-if="show"
-          />
+    <div style="display: flex; gap: 10px">
+      <div style="width: 160px">
+        <el-select placeholder="请选择帖子类型..." value-key="id" v-model="editor.type" :disabled="!store.forum.types.length">
+          <el-option v-for="item in store.forum.types.filter(type => type.id > 0)" :value="item" :label="item.name">
+            <div>
+              <ColorDot :color="item.color"></ColorDot>
+              <span style="margin-left: 10px">{{item.name}}</span>
+            </div>
+          </el-option>
+        </el-select>
+      </div>
+      <div style="flex: 1;">
+        <el-input placeholder="请输入帖子标题" :prefix-icon="Document" v-model="editor.title" maxlength="60"></el-input>
+      </div>
+    </div>
+    <div style="margin-top: 10px; font-size: 13px; color: gray">
+      <ColorDot :color="editor.type? editor.type.color : '#FFFFFF'"></ColorDot>
+      {{editor.type? editor.type.description : '请在上面选择一个帖子标题'}}
+    </div>
+
+    <div style="height: 400px">
+        <MyEditor style="margin-top: 10px; height: calc(100% - 60px); border-radius: 5px"
+                  v-model="editor.text"
+                  placeholder="今天想分享点什么呢 ..."
+                  content-type="delta"
+                  v-loading="editor.loading"
+                  element-loading-text="正在上传图片，请稍后..."
+                  ref="refEditor"
+                  v-if="show"
+        />
 
 
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 15px">
+      <div style="color: gray; font-size: 13px">
+        当前字数：{{contentLength}} (最大支持 30000 字)
       </div>
-      <div style="display: flex; justify-content: space-between; margin-top: 15px">
-        <div style="color: gray; font-size: 13px">
-          当前字数：{{contentLength}} (最大支持 30000 字)
-        </div>
-        <div>
-          <el-button type="success" :icon="Check" @click="submitTopic()" plain>{{submitButton}}</el-button>
-        </div>
+      <div>
+        <el-button type="success" :icon="Check" @click="submitTopic()" plain>{{submitButton}}</el-button>
       </div>
-    </el-drawer>
-  </div>
+    </div>
+  </el-drawer>
 </template>
 
 <style scoped>

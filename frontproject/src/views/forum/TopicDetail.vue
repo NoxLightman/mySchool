@@ -87,6 +87,13 @@ function onCommentAdd(){
   comment.show = false;
   loadComments(Math.floor(++topic.data.comments / 10) + 1);
 }
+
+function deleteComment(id) {
+  get(`api/forum/delete-comment?id=${id}`, () => {
+    ElMessage.success('删除评论成功');
+    loadComments(topic.page)
+  })
+}
 </script>
 
 <template>
@@ -104,7 +111,7 @@ function onCommentAdd(){
 
     <div class="topic-main">
       <div class="topic-main-left">
-        <el-avatar :src="axios.defaults.baseURL + '/image' + topic.data.user.avatar" :size="60"/>
+        <el-avatar :src="store.avatarUserUrl(topic.data.user.avatar)" :size="60"/>
         <div>
           <div style="font-size: 18px; font-weight: bold;">
             {{topic.data.user.username}}
@@ -115,10 +122,10 @@ function onCommentAdd(){
               <el-icon><Female/></el-icon>
             </span>
           </div>
-          <div class="description">{{topic.data.user.email}}</div>
+          <div class="description" style="font-size: 13px; color: gray">{{topic.data.user.email}}</div>
         </div>
         <el-divider style="margin: 10px 0"/>
-        <div style="text-align: left; margin: 0 5px" >
+        <div style="text-align: left; margin: 0 5px; font-size: 12px; color: gray;" >
             <div class="description">手机号：{{topic.data.user.phone || '已隐藏或未填写'}}</div>
             <div class="description">QQ：{{topic.data.user.qq || '已隐藏或未填写'}}</div>
             <div class="description">wx：{{topic.data.user.wx || '已隐藏或未填写'}}</div>
@@ -150,31 +157,22 @@ function onCommentAdd(){
       <div v-if="topic.comment">
         <div class="topic-main" style="margin-top:10px" v-for="item in topic.comment">
           <div class="topic-main-left">
-            <el-avatar :src="axios.defaults.baseURL + '/image' + item.user.avatar" :size="60"/>
+            <el-avatar :src="store.avatarUserUrl(item.user.avatar)" :size="60"/>
             <div>
               <div style="font-size: 18px; font-weight: bold;">
                 {{item.user.username}}
                 <span style="color: hotpink" v-if="item.user.gender === 1">
-            <el-icon><Male/></el-icon>
-          </span>
+                 <el-icon><Male/></el-icon>
+                </span>
                 <span style="color: dodgerblue" v-if="item.user.gender === 0">
-            <el-icon><Female/></el-icon>
-          </span>
+                  <el-icon><Female/></el-icon>
+                </span>
               </div>
-              <div class="description">{{item.user.email}}</div>
             </div>
-            <el-divider style="margin: 10px 0"/>
-            <div style="text-align: left; margin: 0 5px" >
-              <div class="description">手机号：{{item.user.phone || '已隐藏或未填写'}}</div>
-              <div class="description">QQ：{{item.user.qq || '已隐藏或未填写'}}</div>
-              <div class="description">wx：{{item.user.wx || '已隐藏或未填写'}}</div>
-            </div>
-            <el-divider style="margin: 10px 0"/>
-            <div class="description" style="margin: 0  5px">{{item.user.description}}</div>
           </div>
           <div class="topic-main-right">
             <div v-if="item.quote" class="comment-quote">
-              <div>回{{item.quote}}</div>
+              <div>回复：{{item.quote}}</div>
             </div>
 
             <div style="font-size: 13px; color: gray; text-align: left;">
@@ -184,26 +182,17 @@ function onCommentAdd(){
             <div style="text-align: right">
               <el-link :icon="ChatSquare" @Click="comment.show = true; comment.quote=item"
                        type="info">&nbsp; 回复评论 </el-link>
-              <el-link :icon="Delete" type="danger" v-if="item.user.id === store.user.id"
+              <el-link :icon="Delete" type="danger" v-if="item.user.id === store.user.id" @Click="deleteComment(item.id)"
                        style="margin-left: 20px">&nbsp; 删除评论</el-link>
             </div>
 
             <div style="text-align: right; margin-top: 25px">
-              <interact-button name="编辑评论" check-name="编辑评论" color="dodgerblue" :check="true" @check="edit=true" v-if="store.user.id === item.user.id">
-                <el-icon style="translate: 0 2px; margin-right: 3px"><EditPen/></el-icon>
-              </interact-button>
-              <interact-button name="点个赞吧" check-name="已点赞" color="pink" :check="topic.like" @check="interact('like', '点赞')">
-                <el-icon style="translate: 0 2px; margin-right: 3px"><Cherry/></el-icon>
-              </interact-button>
-              <interact-button name="点收藏不迷路" check-name="已收藏" color="orange" :check="topic.collect" @check="interact('collect', '收藏')">
-                <el-icon style="translate: 0 1px; margin-right: 3px"><Star/></el-icon>
-              </interact-button>
             </div>
           </div>
         </div>
         <div style="width: fit-content; margin: 20px auto">
           <el-pagination background layout="prev, pager, next" v-model:current-page="topic.page" @current-change="loadComments"
-                         :total="topic.data.comments" page-size="10"/>
+                         :total="topic.data.comments" :page-size="10"/>
         </div>
       </div>
 
